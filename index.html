@@ -1055,5 +1055,22 @@
     render();
   </script>
 
+
+  <!-- NETLIFY FORM DETECTION FIX (СКРИТА ФОРМА) -->
+  <!-- Това е САМО за Netlify да засече формата. Не се вижда от потребителя. -->
+  <form name="order" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="order" />
+    <p>
+      <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
+    </p>
+    <input type="text" name="fullname" />
+    <input type="text" name="phone" />
+    <input type="text" name="city" />
+    <input type="text" name="courier" />
+    <input type="text" name="deliveryType" />
+    <input type="text" name="total" />
+    <button type="submit">Send</button>
+  </form>
+
 </body>
 </html>
