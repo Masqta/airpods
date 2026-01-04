@@ -1,1000 +1,546 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="bg">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AirPods Pro 3 – Онлайн магазин</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AirStore Bulgaria</title>
   <style>
     :root{
-      --bg1:#f5f5f7;
-      --bg2:#ffffff;
-      --text:#0b0b0f;
-      --muted:#6b7280;
-      --card:#ffffff;
-      --line:rgba(17,17,17,.10);
-      --shadow: 0 18px 60px rgba(0,0,0,.10);
-      --shadow2: 0 10px 30px rgba(0,0,0,.08);
-      --radius: 22px;
-      --pill: 999px;
-      --accent:#111;
-      --accent2:#000;
-      --sale:#16a34a;
-      --sale2:#22c55e;
-      --danger:#ef4444;
+      --bg:#f6f7fb; --text:#0b0b0f; --muted:#6b7280; --line:rgba(0,0,0,.10);
+      --card:rgba(255,255,255,.86); --shadow:0 18px 60px rgba(0,0,0,.10);
+      --r:22px; --pill:999px; --safe:env(safe-area-inset-bottom,0px);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);
+      background:linear-gradient(180deg,var(--bg),#fff)}
+    a{color:inherit}
+
+    /* animations */
+    @keyframes popIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes shimmer{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+    .reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease, transform .55s ease}
+    .reveal.show{opacity:1;transform:translateY(0)}
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+      .reveal{opacity:1;transform:none}
     }
 
-    *{ box-sizing:border-box; }
-    html{ scroll-behavior:smooth; }
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      background: linear-gradient(180deg, var(--bg1), var(--bg2));
-      overflow-x:hidden;
+    /* top */
+    .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.78);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .topin{max-width:980px;margin:0 auto;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+    .pill{position:relative;overflow:hidden;display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:var(--pill);
+      background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.20);font-weight:950;font-size:13px;color:#991b1b}
+    .pill:after{content:"";position:absolute;top:0;left:0;height:100%;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+      transform:translateX(-120%);animation:shimmer 2.8s ease-in-out infinite}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:12px 14px;border-radius:var(--pill);
+      border:1px solid transparent;background:#0b0b0f;color:#fff;font-weight:950;text-decoration:none;cursor:pointer;user-select:none;
+      transition:transform .18s ease, box-shadow .18s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+    .btn:active{transform:translateY(0)}
+    .btnG{background:rgba(255,255,255,.92);border-color:var(--line);color:var(--text)}
+
+    .wrap{max-width:980px;margin:0 auto;padding:22px 14px 120px;animation:popIn .6s ease both}
+
+    /* hero */
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:center}
+    h1{margin:8px 0 10px;font-size:clamp(30px,4.6vw,52px);letter-spacing:-1px;line-height:1.05}
+    p{margin:0;color:var(--muted);line-height:1.5}
+
+    .price{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-top:14px}
+    .now{font-weight:950;font-size:38px}
+    .old{color:#9ca3af;text-decoration:line-through;font-weight:900}
+    .save{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--pill);
+      background:rgba(17,17,17,.06);border:1px solid rgba(17,17,17,.10);font-weight:900;font-size:12px}
+    .dual{color:var(--muted);font-weight:900;font-size:13px}
+
+    /* gallery thumbs */
+    .thumbs{display:flex;gap:10px;justify-content:center;padding:12px 12px 16px}
+    .th{width:54px;height:54px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.92);display:grid;place-items:center;cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease}
+    .th img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.12))}
+    .th:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.12)}
+    .th.active{border-color:rgba(0,0,0,.35)}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+    .img{position:relative;display:flex;align-items:center;justify-content:center;min-height:300px;
+      background:radial-gradient(circle at top, rgba(0,0,0,.08), rgba(0,0,0,.02))}
+    .img img{width:min(520px,92%);height:auto;filter:drop-shadow(0 35px 70px rgba(0,0,0,.18));animation:floaty 5s ease-in-out infinite}
+    .pad{padding:16px}
+
+    .list{display:grid;gap:10px;margin-top:14px}
+    .li{background:rgba(255,255,255,.90);border:1px solid var(--line);border-radius:18px;padding:12px 12px;transition:transform .2s ease}
+    .li:hover{transform:translateY(-2px)}
+    .li b{display:block;margin-bottom:4px}
+    .li small{color:var(--muted)}
+
+    /* sections */
+    .section{margin-top:18px}
+    .h2{margin:0 0 10px;font-size:22px;letter-spacing:-.3px;display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+    .meta{color:var(--muted);font-size:13px}
+
+    .reviewGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .review{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:18px;padding:12px 12px;transition:transform .2s ease}
+    .review:hover{transform:translateY(-2px)}
+    .review .topr{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .review .who{font-weight:950}
+    .review .stars{letter-spacing:1px}
+    .review p{margin:8px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+
+    .faq{display:grid;gap:10px}
+    .faq details{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:18px;padding:10px 12px}
+    .faq summary{cursor:pointer;font-weight:950}
+    .faq .ans{color:var(--muted);margin-top:8px;line-height:1.5;font-size:14px}
+
+    /* cart drawer */
+    .ov{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.2s;z-index:60}
+    .ov.show{opacity:1;pointer-events:auto}
+    .dr{position:fixed;top:0;right:-420px;width:min(420px,100vw);height:100vh;background:rgba(255,255,255,.95);
+      border-left:1px solid var(--line);box-shadow:-20px 0 70px rgba(0,0,0,.18);transition:right .25s;z-index:70;display:flex;flex-direction:column}
+    .dr.show{right:0}
+    .dh{padding:14px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+    .x{border:1px solid var(--line);background:rgba(255,255,255,.8);border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:900}
+    .db{padding:14px 14px;display:grid;gap:12px;overflow:auto}
+    .df{padding:14px 14px;border-top:1px solid var(--line);display:grid;gap:10px}
+
+    .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .qty{display:flex;gap:10px;align-items:center;background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.08);padding:8px 10px;border-radius:var(--pill)}
+    .q{width:34px;height:34px;border-radius:var(--pill);border:1px solid rgba(0,0,0,.10);background:rgba(255,255,255,.9);font-weight:950;cursor:pointer}
+
+    /* modals */
+    .modal{position:fixed;inset:0;display:none;place-items:center;padding:14px;background:rgba(0,0,0,.55);z-index:80}
+    .modal.show{display:grid}
+    .modalCard{width:min(720px,100%);max-height:90vh;overflow:auto;background:linear-gradient(180deg,#0b0b0f,#000);
+      color:#fff;border:1px solid rgba(255,255,255,.10);border-radius:26px;box-shadow:0 30px 120px rgba(0,0,0,.45);animation:popIn .25s ease both}
+    .modalHead{padding:14px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.12)}
+    .modalHead h2{margin:0;font-size:22px}
+    .modalBody{padding:14px 14px}
+
+    form{display:grid;gap:10px;max-width:520px}
+    input,select{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;outline:none}
+    input::placeholder{color:rgba(255,255,255,.62)}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    .successBox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:14px}
+
+    /* single call button */
+    .call{position:fixed;right:14px;bottom:calc(14px + var(--safe));z-index:55;text-decoration:none;background:#0b0b0f;color:#fff;
+      font-weight:950;padding:14px 16px;border-radius:var(--pill);box-shadow:0 14px 40px rgba(0,0,0,.28);
+      transition:transform .18s ease, box-shadow .18s ease}
+    .call:hover{transform:translateY(-2px);box-shadow:0 18px 46px rgba(0,0,0,.30)}
+
+    /* mobile */
+    @media (max-width: 860px){
+      .hero{grid-template-columns:1fr}
+      .hero .card{order:-1}
+      .two{grid-template-columns:1fr}
+      .btn{width:100%}
+      .img{min-height:260px}
+      .reviewGrid{grid-template-columns:1fr}
+      .partners{grid-template-columns:repeat(2,1fr)}
     }
 
-    /* TOP SALE BAR */
-    .salebar{
-      position: sticky;
-      top:0;
-      z-index: 999;
-      background: linear-gradient(90deg, rgba(34,197,94,.15), rgba(239,68,68,.12));
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(10px);
-    }
-    .salebar-inner{
-      max-width: 1150px;
-      margin: 0 auto;
-      padding: 10px 16px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      font-size: 14px;
-    }
-    .sale-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 6px 12px;
-      border-radius: var(--pill);
-      background: rgba(22,163,74,.12);
-      border: 1px solid rgba(22,163,74,.25);
-      color: #0f5132;
-      font-weight: 700;
-      letter-spacing:.2px;
-    }
-    .salebar a{
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: var(--pill);
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.55);
-      transition: transform .2s ease;
-      white-space:nowrap;
-    }
-    .salebar a:hover{ transform: translateY(-1px); }
-
-    /* HERO */
-    .hero{
-      position: relative;
-      padding: 72px 16px 34px;
-    }
-    .hero-inner{
-      max-width: 1150px;
-      margin: 0 auto;
-      display:grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap: 28px;
-      align-items:center;
-    }
-
-    .badge{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      padding: 10px 14px;
-      border-radius: var(--pill);
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.70);
-      box-shadow: 0 6px 20px rgba(0,0,0,.06);
-      width: fit-content;
-      animation: pop .8s ease;
-    }
-    .dot{
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--sale2), var(--sale));
-      box-shadow: 0 0 0 6px rgba(34,197,94,.15);
-    }
-    .hero h1{
-      font-size: clamp(36px, 4.2vw, 64px);
-      margin: 16px 0 12px;
-      letter-spacing: -1px;
-      line-height: 1.02;
-      animation: fadeDown 1s ease;
-    }
-    .hero p{
-      margin: 0 0 18px;
-      color: var(--muted);
-      font-size: 18px;
-      max-width: 54ch;
-      animation: fadeUp 1s ease;
-    }
-
-    .cta-row{
-      display:flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items:center;
-      margin-top: 14px;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      padding: 14px 18px;
-      border-radius: var(--pill);
-      text-decoration:none;
-      font-weight: 800;
-      border: 1px solid transparent;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-      cursor:pointer;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn-primary{
-      color:#fff;
-      background: linear-gradient(180deg, var(--accent), var(--accent2));
-      box-shadow: 0 16px 40px rgba(0,0,0,.18);
-    }
-    .btn-primary:hover{ transform: translateY(-2px); }
-    .btn-ghost{
-      color: var(--text);
-      background: rgba(255,255,255,.70);
-      border-color: var(--line);
-      box-shadow: 0 10px 28px rgba(0,0,0,.08);
-    }
-    .btn-ghost:hover{ transform: translateY(-2px); }
-
-    .price-row{
-      display:flex;
-      align-items: baseline;
-      gap: 12px;
-      margin: 18px 0 2px;
-      flex-wrap: wrap;
-    }
-    .price{
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: -.5px;
-    }
-    .old{
-      color: #9ca3af;
-      text-decoration: line-through;
-      font-weight: 800;
-    }
-    .save{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 12px;
-      border-radius: var(--pill);
-      background: rgba(239,68,68,.10);
-      border: 1px solid rgba(239,68,68,.18);
-      color: #991b1b;
-      font-weight: 900;
-      font-size: 13px;
-    }
-
-    /* PRODUCT CARD */
-    .card{
-      background: rgba(255,255,255,.75);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      position: relative;
-    }
-    .card-inner{
-      padding: 18px;
-      display:grid;
-      gap: 14px;
-    }
-
-    .gallery{
-      border-radius: calc(var(--radius) - 6px);
-      overflow:hidden;
-      background: radial-gradient(circle at top, rgba(0,0,0,.08), rgba(0,0,0,.02));
-      min-height: 360px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position: relative;
-    }
-    .gallery img{
-      width: min(520px, 92%);
-      height: auto;
-      filter: drop-shadow(0 35px 70px rgba(0,0,0,.18));
-      animation: float 4s ease-in-out infinite;
-    }
-
-    .thumbs{
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
-      padding: 8px 4px 0;
-    }
-    .thumb{
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.70);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      transition: transform .2s ease;
-      overflow:hidden;
-    }
-    .thumb:hover{ transform: translateY(-2px); }
-    .thumb img{ width: 90%; height: auto; opacity:.9; }
-
-    .ribbon{
-      position:absolute;
-      top: 14px;
-      left: 14px;
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(34,197,94,.95), rgba(22,163,74,.95));
-      color:#fff;
-      font-weight: 900;
-      box-shadow: 0 14px 34px rgba(16,185,129,.20);
-      letter-spacing:.2px;
-    }
-
-    /* TRUST */
-    .trust{
-      max-width: 1150px;
-      margin: 18px auto 0;
-      padding: 0 16px;
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-    .trust .t{
-      background: rgba(255,255,255,.70);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px 14px;
-      box-shadow: var(--shadow2);
-      display:flex;
-      gap: 12px;
-      align-items:flex-start;
-    }
-    .t b{ display:block; margin-bottom: 2px; }
-    .t small{ color: var(--muted); }
-
-    /* CLEAN SECTIONS (по-изчистено, повече въздух) */
-    .section{
-      max-width: 1150px;
-      margin: 0 auto;
-      padding: 72px 16px;
-    }
-    .section h2{
-      margin: 0 0 18px;
-      font-size: clamp(26px, 3.2vw, 36px);
-      letter-spacing: -.4px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .feat{
-      background: rgba(255,255,255,.70);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 18px 16px;
-      box-shadow: var(--shadow2);
-      transition: transform .25s ease;
-    }
-    .feat:hover{ transform: translateY(-3px); }
-    .feat .k{ font-weight: 950; margin-bottom: 6px; }
-    .feat .d{ color: var(--muted); font-size: 14px; line-height: 1.42; }
-
-    /* FAQ */
-    .faq{ display:grid; gap: 12px; }
-    .faq-item{
-      background: rgba(255,255,255,.70);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 10px 14px;
-      box-shadow: var(--shadow2);
-    }
-    .faq-item summary{ cursor:pointer; font-weight: 950; padding: 12px 6px; }
-    .faq-body{ color: var(--muted); padding: 0 6px 12px; line-height: 1.5; }
-
-    /* CHECKOUT */
-    .checkout-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items:start; margin-top: 18px; }
-    .checkout-card{ background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 22px; padding: 16px; }
-    .checkout-title{ font-weight: 950; margin-bottom: 12px; }
-    .two{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    select{ width:100%; padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.08); color:#fff; }
-
-    .cart-row{ display:flex; justify-content:space-between; gap: 12px; align-items:center; }
-    .qty{ display:flex; gap: 10px; align-items:center; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); padding: 8px 10px; border-radius: 999px; }
-    .qty-btn{ width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.08); color:#fff; font-weight: 950; cursor:pointer; }
-
-    .cart-line{ display:flex; justify-content:space-between; gap: 12px; margin-top: 10px; opacity:.92; }
-    .cart-line.total{ font-weight: 950; opacity:1; }
-    .divider{ height:1px; background: rgba(255,255,255,.14); margin: 12px 0; }
-
-    .upsell{ display:flex; gap: 10px; align-items:center; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); padding: 12px; border-radius: 14px; margin-top: 12px; cursor:pointer; }
-    .upsell input{ width:auto; }
-
-    /* CART DRAWER */
-    .overlay{ position:fixed; inset:0; background: rgba(0,0,0,.55); opacity:0; pointer-events:none; transition: opacity .2s ease; z-index: 998; }
-    .overlay.show{ opacity:1; pointer-events:auto; }
-    .drawer{ position: fixed; top: 0; right: -420px; width: min(420px, 92vw); height: 100vh; background: rgba(255,255,255,.94); border-left: 1px solid var(--line); z-index: 999; box-shadow: -20px 0 70px rgba(0,0,0,.18); transition: right .25s ease; display:flex; flex-direction:column; }
-    .drawer.show{ right: 0; }
-    .drawer-head{ padding: 16px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid var(--line); }
-    .drawer-close{ border: 1px solid var(--line); background: rgba(255,255,255,.75); border-radius: 12px; padding: 8px 10px; cursor:pointer; }
-    .drawer-body{ padding: 14px 16px; overflow:auto; }
-    .drawer-item{ display:flex; justify-content:space-between; gap: 12px; align-items:center; }
-    .drawer-foot{ padding: 14px 16px; border-top: 1px solid var(--line); display:grid; gap: 10px; }
-
-    /* FLOAT CONTACT */
-    .fab{ position:fixed; right:16px; z-index: 997; color:#fff; padding:14px 16px; border-radius:999px; font-weight:900; text-decoration:none; box-shadow:0 14px 40px rgba(0,0,0,.3) }
-    .fab.wa{ bottom:110px; background:#25D366; }
-    .fab.vb{ bottom:60px; background:#7360f2; }
-
-    /* MOBILE-FIRST */
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: 1fr 1fr; }
-      .checkout-grid{ grid-template-columns: 1fr; }
-      .two{ grid-template-columns: 1fr; }
-    }
-    @media (max-width: 720px){
-      .salebar-inner{ flex-wrap:wrap; gap:10px; }
-      .hero{ padding: 56px 16px 20px; }
-      .cta-row{ gap: 10px; }
-      .btn{ width: 100%; justify-content:center; }
-      .section{ padding: 56px 16px; }
-      .trust{ grid-template-columns: 1fr; }
-      .gallery{ min-height: 280px; }
-    }
-    @media (max-width: 520px){
-      .grid{ grid-template-columns: 1fr; }
-      .price{ font-size: 34px; }
-      .thumb{ width: 58px; height: 58px; }
-      .sticky{ flex-direction: column; align-items:stretch; }
-      .sticky .right{ justify-content:space-between; }
-      .sticky .title{ max-width: 100%; }
-    }
-
-    /* REVIEWS */
-    .reviews-wrap{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 14px;
-      align-items:start;
-    }
-    .rating-card{
-      background: rgba(255,255,255,.70);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 18px 16px;
-      box-shadow: var(--shadow2);
-    }
-    .rating-top{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-    .big-rating{
-      font-size: 46px;
-      font-weight: 950;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-    .stars{
-      font-size: 18px;
-      letter-spacing: 1px;
-      margin-top: 6px;
-      user-select:none;
-    }
-    .sub{
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
-    }
-    .bars{ margin-top: 14px; display:grid; gap: 8px; }
-    .bar-row{ display:grid; grid-template-columns: 56px 1fr 36px; gap: 10px; align-items:center; font-size: 13px; color: var(--muted); }
-    .bar{
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.08);
-      overflow:hidden;
-      border: 1px solid rgba(0,0,0,.06);
-    }
-    .bar > i{ display:block; height:100%; border-radius: 999px; background: linear-gradient(90deg, rgba(34,197,94,.85), rgba(22,163,74,.85)); }
-
-    .review-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .review{
-      background: rgba(255,255,255,.70);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 16px 16px;
-      box-shadow: var(--shadow2);
-      transition: transform .25s ease;
-    }
-    .review:hover{ transform: translateY(-3px); }
-    .review-head{ display:flex; justify-content:space-between; gap: 10px; align-items:center; }
-    .who{ font-weight: 900; }
-    .when{ color: var(--muted); font-size: 12px; white-space:nowrap; }
-    .review .stars{ font-size: 14px; margin: 10px 0 6px; }
-    .review p{ margin: 0; color: #111827; font-size: 14px; line-height: 1.45; }
-
-    @media (max-width: 980px){
-      .reviews-wrap{ grid-template-columns: 1fr; }
-      .review-grid{ grid-template-columns: 1fr; }
-    }
-
-    /* ORDER */
-    .order{
-      background: linear-gradient(180deg, #0b0b0f, #000);
-      color:#fff;
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,.10);
-      padding: 34px 18px;
-      box-shadow: 0 35px 90px rgba(0,0,0,.35);
-    }
-    .order h2{ margin:0 0 8px; font-size: 32px; }
-    .order p{ margin:0 0 18px; opacity:.85; }
-    form{ max-width: 520px; margin: 0 auto; display:grid; gap: 10px; }
-    input{
-      width:100%;
-      padding: 14px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      outline:none;
-      background: rgba(255,255,255,.08);
-      color:#fff;
-    }
-    input::placeholder{ color: rgba(255,255,255,.62); }
-
-    .note{
-      margin-top: 12px;
-      text-align:center;
-      color: rgba(255,255,255,.72);
-      font-size: 13px;
-    }
-
-    /* STICKY BUY BAR */
-    .sticky{
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      z-index: 999;
-      background: rgba(255,255,255,.78);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      box-shadow: 0 22px 70px rgba(0,0,0,.18);
-      backdrop-filter: blur(14px);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      padding: 10px 12px;
-      max-width: 1150px;
-      margin: 0 auto;
-    }
-    .sticky .left{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .mini{
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.9);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      flex: 0 0 auto;
-    }
-    .mini img{ width: 90%; height: auto; }
-    .sticky .title{
-      font-weight: 900;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 38vw;
-    }
-    .sticky .meta{ color: var(--muted); font-size: 13px; }
-    .sticky .right{ display:flex; gap: 10px; align-items:center; }
-
-    footer{
-      max-width: 1150px;
-      margin: 0 auto;
-      padding: 22px 16px 110px;
-      color: var(--muted);
-      text-align:center;
-    }
-
-    /* Animations */
-    @keyframes fadeDown { from { opacity:0; transform: translateY(-14px);} to { opacity:1; transform: translateY(0);} }
-    @keyframes fadeUp { from { opacity:0; transform: translateY(14px);} to { opacity:1; transform: translateY(0);} }
-    @keyframes float { 0%,100%{ transform: translateY(0) rotate(0deg);} 50%{ transform: translateY(-10px) rotate(.6deg);} }
-    @keyframes pop { from { transform: scale(.96); opacity:.2;} to { transform: scale(1); opacity:1;} }
-
-    /* Responsive */
-    @media (max-width: 980px){
-      .hero-inner{ grid-template-columns: 1fr; }
-      .trust{ grid-template-columns: 1fr; }
-      .grid{ grid-template-columns: 1fr 1fr; }
-      .gallery{ min-height: 300px; }
-      .sticky .title{ max-width: 46vw; }
-    }
-    @media (max-width: 520px){
-      .grid{ grid-template-columns: 1fr; }
-      .sticky{ flex-direction: column; align-items:stretch; }
-      .sticky .right{ justify-content:space-between; }
-      .sticky .title{ max-width: 100%; }
+    /* partners */
+    .partners{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+    .partner{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;place-items:center;
+      transition:transform .2s ease, box-shadow .2s ease}
+    .partner:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.12)}
+    .partner img{max-width:120px;max-height:48px;object-fit:contain;filter:none;opacity:1}
+    .partner:hover img{filter:none;opacity:1}
+      .hero .card{order:-1}
+      .two{grid-template-columns:1fr}
+      .btn{width:100%}
+      .img{min-height:260px}
+      .reviewGrid{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
 
-  <div class="salebar">
-    <div class="salebar-inner">
-      <span class="sale-pill">🔥 НАМАЛЕНИЕ -25% • Офертата е активна</span>
-      <div style="display:flex;gap:10px;align-items:center">
-        <a href="#" id="openCartTop">Кошница</a>
-        <a href="#checkout" id="goCheckoutTop">Поръчай</a>
-      </div>
+  <div class="top">
+    <div class="topin">
+      <span class="pill">🔥 -38% НАМАЛЕНИЕ • БЕЗПЛАТНА ДОСТАВКА</span>
     </div>
   </div>
 
-  <!-- PAGE: PRODUCT -->
-  <main id="pageProduct">
-    <section class="hero">
-      <div class="hero-inner">
-        <div>
-          <div class="badge"><span class="dot"></span>Налични • Доставка 24–48ч</div>
-          <h1>AirPods Pro 3</h1>
-          <p>Премиум звук, дълбок бас, по-добро шумопотискане и удобство през целия ден.</p>
+  <a class="call" href="tel:0878460279">📞 0878460279</a>
 
-          <div class="price-row">
-            <div class="price"><span id="priceNow">299</span> лв</div>
-            <div class="old">399 лв</div>
-            <div class="save">Спестяваш 100 лв</div>
+  <div class="wrap">
+    <section class="hero reveal">
+      <div>
+        <h1>AirPods Pro 3</h1>
+        <p>Премиум звук и удобство. <b>Безплатна доставка</b> до офис или адрес.</p>
+
+        <div class="price">
+          <div class="now">
+            € <span id="priceNowEur">152.86</span>
+            <span class="dual">(<span id="priceNowBgn">299</span> лв)</span>
           </div>
-
-          <div class="cta-row">
-            <span class="save">🎁 ПОДАРЪК: прозрачно калъфче</span>
-            <a class="btn btn-primary" href="#" id="openCart">🛒 Добави в кошницата</a>
-            <a class="btn btn-ghost" href="#features">✨ Предимства</a>
+          <div class="old">
+            € <span id="oldPriceEur">245.41</span>
+            <span class="dual">(<span id="oldPriceBgn">479.98</span> лв)</span>
           </div>
+          <div class="save" id="saveText">Спестяваш € 92.55 (180.98 лв)</div>
+        </div>
 
-          <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
-            <span class="save">✅ Преглед и тест</span>
-            <span class="save">✅ Наложен платеж</span>
-            <span class="save">✅ 24–48ч доставка</span>
+        <div class="list">
+          <div class="li"><b>✅ Наложен платеж</b><small>Плащаш при получаване</small></div>
+          <div class="li"><b>✅ Преглед + тест</b><small>Проверка при куриера</small></div>
+          <div class="li"><b>🚚 Доставка за наша сметка</b><small>Безплатна до офис или адрес</small></div>
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn" href="#" id="openCart">🛒 Кошница</a>
+          <a class="btn btnG" href="#" id="openOrder">🧾 Поръчка</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="img">
+          <div style="
+            position:absolute;
+            top:12px;
+            left:12px;
+            padding:8px 14px;
+            background:linear-gradient(180deg,#22c55e,#16a34a);
+            color:#fff;
+            font-weight:900;
+            font-size:13px;
+            border-radius:999px;
+            box-shadow:0 10px 24px rgba(0,0,0,.18);
+            border:1px solid rgba(255,255,255,.35);
+            z-index:5;
+            user-select:none;
+          ">
+            -38% OFF • AirStore 🎁
+          </div>
+          <img id="mainImg" src="assets/airpods.png" alt="AirPods Pro 3" />
+        </div>
+        <div class="thumbs" aria-label="Галерия">
+          <button class="th active" type="button" data-src="assets/airpods.png" aria-label="Снимка 1"><img src="assets/airpods.png" alt="" /></button>
+          <button class="th" type="button" data-src="assets/airpods_2.png" aria-label="Снимка 2"><img src="assets/airpods_2.png" alt="" onerror="this.src='assets/airpods.png'" /></button>
+          <button class="th" type="button" data-src="assets/airpods_3.png" aria-label="Снимка 3"><img src="assets/airpods_3.png" alt="" onerror="this.src='assets/airpods.png'" /></button>
+        </div>
+        <div class="pad" style="display:grid;gap:10px">
+          <div class="row"><b>В комплекта</b><span style="color:var(--muted);font-size:13px">какво получаваш</span></div>
+          <div class="li"><b>🎧 AirPods Pro 3</b><small>С кейс за зареждане</small></div>
+          <div class="li"><b>🧩 Допълнително тапички</b><small>За удобство и комфорт</small></div>
+          <div class="li"><b>🛡️ Гаранция</b><small>6 месеца</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="h2"><span>Отзиви от клиенти</span></div>
+      <div class="reviewGrid" style="grid-template-columns:1.2fr .8fr .8fr">
+        <div class="review" style="padding:18px">
+          <div style="font-size:42px;font-weight:950;line-height:1">4.9</div>
+          <div class="stars" style="margin:6px 0">★★★★★</div>
+          <div class="meta">на база 312 отзива • 96% препоръчват</div>
+          <div style="margin-top:14px;display:grid;gap:8px">
+            <div class="row"><span>5★</span><span style="flex:1;height:8px;background:#e5e7eb;border-radius:999px;margin:0 8px"><span style="display:block;height:8px;width:92%;background:#22c55e;border-radius:999px"></span></span><span>287</span></div>
+            <div class="row"><span>4★</span><span style="flex:1;height:8px;background:#e5e7eb;border-radius:999px;margin:0 8px"><span style="display:block;height:8px;width:6%;background:#22c55e;border-radius:999px"></span></span><span>19</span></div>
+            <div class="row"><span>3★</span><span style="flex:1;height:8px;background:#e5e7eb;border-radius:999px;margin:0 8px"><span style="display:block;height:8px;width:1%;background:#22c55e;border-radius:999px"></span></span><span>4</span></div>
+            <div class="row"><span>2★</span><span style="flex:1;height:8px;background:#e5e7eb;border-radius:999px;margin:0 8px"></span><span>1</span></div>
+            <div class="row"><span>1★</span><span style="flex:1;height:8px;background:#e5e7eb;border-radius:999px;margin:0 8px"></span><span>1</span></div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="ribbon">-25% OFF + 🎁 ПОДАРЪК</div>
-          <div class="card-inner">
-            <div class="gallery">
-              <img id="mainImg" src="assets/airpods.png" alt="AirPods Pro 3" />
-            </div>
-            <div class="thumbs" aria-label="Галерия">
-              <div class="thumb" data-src="assets/airpods.png" title="Изглед 1"><img src="assets/airpods.png" alt="thumb" /></div>
-              <div class="thumb" data-src="assets/airpods.png" title="Изглед 2"><img src="assets/airpods.png" alt="thumb" /></div>
-              <div class="thumb" data-src="assets/airpods.png" title="Изглед 3"><img src="assets/airpods.png" alt="thumb" /></div>
-            </div>
-          </div>
+        <div class="review">
+          <div class="topr"><div class="who">Иван П.</div><div class="meta">преди 2 дни</div></div>
+          <div class="stars">★★★★★</div>
+          <p>Много чист звук и шумопотискането е топ. Дойдоха бързо, опаковката беше супер.</p>
+        </div>
+
+        <div class="review">
+          <div class="topr"><div class="who">Мария К.</div><div class="meta">преди 5 дни</div></div>
+          <div class="stars">★★★★★</div>
+          <p>Удобни за носене и батерията държи много. Преглед и тест при куриера — всичко ок.</p>
         </div>
       </div>
     </section>
 
-    <section class="trust">
-      <div class="t"><div>🚚</div><div><b>Бърза доставка</b><small>До 24–48 часа в България</small></div></div>
-      <div class="t"><div>🧾</div><div><b>Наложен платеж</b><small>Плащаш при получаване</small></div></div>
-      <div class="t"><div>🛡️</div><div><b>Преглед + тест</b><small>Проверка при куриера</small></div></div>
-    </section>
-
-    <section class="section" id="bonus">
-      <h2>🎁 Бонуси към поръчката</h2>
-      <div class="grid">
-        <div class="feat"><div class="k">🧴 Прозрачно калъфче (ПОДАРЪК)</div><div class="d">Защитава кейса от надраскване и удари.</div></div>
-        <div class="feat"><div class="k">🎧 Резервни накрайници</div><div class="d">S / M / L за максимален комфорт.</div></div>
-        <div class="feat"><div class="k">⚡ USB‑C кабел</div><div class="d">Бързо и удобно зареждане.</div></div>
-        <div class="feat"><div class="k">🛡️ 6 месеца гаранция</div><div class="d">Спокойствие при всяка покупка.</div></div>
-      </div>
-    </section>
-
-    <section class="section" id="features">
-      <h2>Предимства</h2>
-      <div class="grid">
-        <div class="feat"><div class="k">🔇 Active Noise Cancellation</div><div class="d">По-тихо навън, повече музика за теб.</div></div>
-        <div class="feat"><div class="k">🌍 Spatial Audio</div><div class="d">По-широка сцена и усещане за пространство.</div></div>
-        <div class="feat"><div class="k">🔋 До 30 часа</div><div class="d">С кейса — повече слушане, по-малко зареждане.</div></div>
-        <div class="feat"><div class="k">⚡ USB‑C + MagSafe</div><div class="d">Удобно зареждане с модерни стандарти.</div></div>
-      </div>
-    </section>
-
-    <section class="section" id="faq">
-      <h2>❓ Често задавани въпроси</h2>
+    <section class="section reveal">
+      <div class="h2"><span>Често задавани въпроси</span></div>
       <div class="faq">
-        <details class="faq-item" open>
-          <summary>Оригинални ли са?</summary>
-          <div class="faq-body">Продуктът е висок клас реплика с отлично качество и звук.</div>
+        <details open>
+          <summary>Защо да изберете AIRSTORE?</summary>
+          <div class="ans">Ниски цени с директен внос от Англия, безплатна доставка, наложен платеж с преглед и тест, и 6 месеца гаранция.</div>
         </details>
-        <details class="faq-item">
+        <details>
           <summary>Има ли преглед и тест?</summary>
-          <div class="faq-body">Да — преглед и тест при получаване (при куриера).</div>
+          <div class="ans">Да преглед и тест при получаване (при куриера).</div>
         </details>
-        <details class="faq-item">
+        <details>
           <summary>Колко е доставката?</summary>
-          <div class="faq-body">Доставка до 24–48 часа (в зависимост от града).</div>
-        </details>
-        <details class="faq-item">
-          <summary>Как се плаща?</summary>
-          <div class="faq-body">Наложен платеж — плащаш при получаване.</div>
+          <div class="ans">Доставката е безплатна до офис или адрес. Имаме партньорство с куриерските фирми <b>Еконт</b> и <b>Спиди</b>, което ни позволява бърза и сигурна доставка.</div>
         </details>
       </div>
     </section>
 
-    <section class="section" id="reviews">
-      <h2>Отзиви от клиенти</h2>
-      <div class="reviews-wrap">
-        <div class="rating-card">
-          <div class="rating-top">
-            <div>
-              <div class="big-rating">4.9</div>
-              <div class="stars" aria-label="Рейтинг">★★★★★</div>
-              <div class="sub">на база 312 отзива • 96% препоръчват</div>
-            </div>
-            <a class="btn btn-ghost" href="#" id="openCart2">Добави в кошницата</a>
-          </div>
-          <div class="bars" aria-label="Разпределение на оценките">
-            <div class="bar-row"><span>5★</span><span class="bar"><i style="width:92%"></i></span><span>287</span></div>
-            <div class="bar-row"><span>4★</span><span class="bar"><i style="width:6%"></i></span><span>19</span></div>
-            <div class="bar-row"><span>3★</span><span class="bar"><i style="width:1%"></i></span><span>4</span></div>
-            <div class="bar-row"><span>2★</span><span class="bar"><i style="width:0.6%"></i></span><span>1</span></div>
-            <div class="bar-row"><span>1★</span><span class="bar"><i style="width:0.4%"></i></span><span>1</span></div>
-          </div>
-        </div>
-
-        <div class="review-grid">
-          <div class="review"><div class="review-head"><div class="who">Иван П.</div><div class="when">преди 2 дни</div></div><div class="stars">★★★★★</div><p>Много чист звук и шумопотискането е топ. Дойдоха бързо, опаковката беше супер.</p></div>
-          <div class="review"><div class="review-head"><div class="who">Мария К.</div><div class="when">преди 5 дни</div></div><div class="stars">★★★★★</div><p>Удобни за носене и батерията държи много. Преглед и тест при куриера — всичко ок.</p></div>
-          <div class="review"><div class="review-head"><div class="who">Георги Н.</div><div class="when">преди 1 седмица</div></div><div class="stars">★★★★★</div><p>Басът е плътен, а Spatial Audio е яко. За цената — много добра оферта.</p></div>
-          <div class="review"><div class="review-head"><div class="who">Десислава Т.</div><div class="when">преди 2 седмици</div></div><div class="stars">★★★★☆</div><p>Като цяло супер. Бих искала още един чифт накрайници, но иначе всичко е 10/10.</p></div>
-        </div>
+    <!-- PARTNERS -->
+    <section class="section reveal">
+      <div class="h2"><span>Наши партньори</span><span class="meta">доверени логистични и търговски партньори</span></div>
+      <div class="partners">
+        <div class="partner"><img src="assets/partner1.png" alt="Партньор 1"></div>
+        <div class="partner"><img src="assets/partner2.png" alt="Партньор 2"></div>
+        <div class="partner"><img src="assets/partner3.png" alt="Партньор 3"></div>
       </div>
+      <p class="meta" style="margin-top:8px"></p>
     </section>
+  </div>
 
-    <footer>
-      <small>Ако не ти зарежда снимката: сложи файл <b>assets/airpods.png</b> до <b>index.html</b>.</small>
-    </footer>
-  </main>
-
-  <!-- PAGE: CHECKOUT -->
-  <main id="pageCheckout" style="display:none">
-    <section class="section">
-      <div class="order" id="checkout">
-        <h2>🧾 Поръчка</h2>
-        <p>Провери кошницата и попълни данните за доставка (Econt/Speedy).</p>
-
-        <div class="checkout-grid">
-          <div class="checkout-card">
-            <div class="checkout-title">Кошница</div>
-
-            <div class="cart-row">
-              <div style="font-weight:900">AirPods Pro 3</div>
-              <div class="qty">
-                <button class="qty-btn" type="button" id="qtyMinus">−</button>
-                <span id="qtyVal">1</span>
-                <button class="qty-btn" type="button" id="qtyPlus">+</button>
-              </div>
-            </div>
-
-            <div class="cart-line"><span>Ед. цена</span><span id="unitPrice">299 лв</span></div>
-            <div class="cart-line"><span>🎁 Подарък (калъфче)</span><span>0 лв</span></div>
-
-            <label class="upsell">
-              <input type="checkbox" id="upsellCheckout" />
-              <span>➕ Добави <b>премиум калъф</b> + <b>10 лв</b></span>
-            </label>
-
-            <div class="divider"></div>
-            <div class="cart-line total"><span>Общо</span><span id="totalCheckout">299 лв</span></div>
-          </div>
-
-          <div class="checkout-card">
-            <div class="checkout-title">Данни за доставка</div>
-
-            <form name="order" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" onsubmit="return submitOrder(event)">
-              <input type="hidden" name="form-name" value="order" />
-              <p style="display:none"><label>Don’t fill this out if you’re human: <input name="bot-field" /></label></p>
-              <input type="hidden" name="email_subject" value="Нова поръчка: AirPods Pro 3" />
-
-              <div class="two">
-                <select id="courier" name="courier" required>
-                  <option value="" selected disabled>Избери куриер</option>
-                  <option value="Econt">Econt</option>
-                  <option value="Speedy">Speedy</option>
-                </select>
-                <select id="deliveryType" name="deliveryType" required>
-                  <option value="" selected disabled>Начин на получаване</option>
-                  <option value="office">До офис</option>
-                  <option value="address">До адрес</option>
-                </select>
-              </div>
-
-              <input type="text" id="city" name="city" placeholder="Град" required />
-              <input type="text" id="office" name="office" placeholder="Офис (име/адрес)" style="display:none" />
-              <input type="text" id="addr" name="address" placeholder="Адрес (улица, номер, вход, ет.)" style="display:none" />
-
-              <div class="two">
-                <input type="text" id="fullname" name="fullname" placeholder="Име и фамилия" required />
-                <input type="tel" id="phone" name="phone" placeholder="Телефон" required />
-              </div>
-              <input type="text" id="note" name="note" placeholder="Бележка (по желание)" />
-
-              <input type="hidden" id="items" name="items" value="AirPods Pro 3 x1" />
-              <input type="hidden" id="total" name="total" value="299" />
-              <input type="hidden" id="qtyHidden" name="qty" value="1" />
-              <input type="hidden" id="upsellHidden" name="upsell" value="no" />
-
-              <button class="btn btn-primary" type="submit">✅ Потвърди поръчка</button>
-              <a class="btn btn-ghost" href="#" id="backToProduct">← Назад</a>
-
-              <div class="note">Имейл известие ще идва през Netlify Forms (когато сайтът е качен на Netlify).</div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- FLOAT CONTACT -->
-  <a href="https://wa.me/359000000000" class="fab wa">WhatsApp</a>
-  <a href="viber://chat?number=%2B359000000000" class="fab vb">Viber</a>
-
-  <!-- CART DRAWER -->
-  <div id="cartOverlay" class="overlay" aria-hidden="true"></div>
-  <aside id="cartDrawer" class="drawer" aria-label="Кошница" aria-hidden="true">
-    <div class="drawer-head">
+  <div class="ov" id="ov" aria-hidden="true"> </div> 
+  <aside class="dr" id="dr" aria-hidden="true" aria-label="Кошница">
+    <div class="dh">
       <div style="font-weight:950">🛒 Кошница</div>
-      <button class="drawer-close" id="closeCart" aria-label="Затвори">✕</button>
+      <button class="x" id="x" aria-label="Затвори">✕</button>
     </div>
-
-    <div class="drawer-body">
-      <div class="drawer-item">
+    <div class="db">
+      <div class="row">
         <div>
           <div style="font-weight:950">AirPods Pro 3</div>
-          <div style="color:var(--muted);font-size:13px">🎁 Подарък: прозрачно калъфче</div>
+          <div style="color:var(--muted);font-size:13px">Доставка: <b>Безплатна</b></div>
         </div>
         <div class="qty">
-          <button class="qty-btn" type="button" id="qtyMinusDrawer">−</button>
-          <span id="qtyValDrawer">1</span>
-          <button class="qty-btn" type="button" id="qtyPlusDrawer">+</button>
+          <button class="q" type="button" id="m">−</button>
+          <b id="qv">1</b>
+          <button class="q" type="button" id="p">+</button>
         </div>
       </div>
-
-      <label class="upsell" style="margin-top:12px">
-        <input type="checkbox" id="upsellDrawer" />
-        <span>➕ Премиум калъф <b>+10 лв</b></span>
-      </label>
-
-      <div class="divider"></div>
-      <div class="cart-line"><span>Междинна сума</span><span id="subTotal">299 лв</span></div>
-      <div class="cart-line"><span>Upsell</span><span id="upsellPrice">0 лв</span></div>
-      <div class="cart-line total"><span>Общо</span><span id="grandTotal">299 лв</span></div>
+      <div class="row">
+        <b>Общо</b>
+        <b>
+          € <span id="totalCartEur">152.86</span>
+          <span class="dual">(<span id="totalCartBgn">299</span> лв)</span>
+        </b>
+      </div>
     </div>
-
-    <div class="drawer-foot">
-      <a class="btn btn-primary" href="#checkout" id="goCheckout">Продължи към поръчка</a>
-      <button class="btn btn-ghost" id="closeCart2" type="button">Продължи разглеждане</button>
+    <div class="df">
+      <a class="btn" href="#" id="toOrder">Продължи към поръчка</a>
+      <a class="btn btnG" href="tel:0878460279">📞 Обади се</a>
     </div>
   </aside>
 
-  <!-- STICKY BUY BAR -->
-  <div class="sticky" role="region" aria-label="Бърза поръчка">
-    <div class="left">
-      <div class="mini"><img src="assets/airpods.png" alt="AirPods" /></div>
-      <div>
-        <div class="title">AirPods Pro 3</div>
-        <div class="meta"><span id="stickyTotal">299</span> лв • Наложен платеж</div>
+  <!-- ORDER MODAL -->
+  <div class="modal" id="orderModal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-label="Поръчка">
+      <div class="modalHead">
+        <h2>Поръчка</h2>
+        <button class="x" id="closeOrder" aria-label="Затвори">✕</button>
       </div>
-    </div>
-    <div class="right">
-      <span class="save">-25%</span>
-      <a class="btn btn-primary" href="#" id="openCart3">Кошница</a>
+      <div class="modalBody">
+        <p style="margin:0 0 10px;color:rgba(255,255,255,.78)">Провери количеството в кошницата и попълни данните за доставка.</p>
+
+        <div class="row" style="margin:0 0 10px">
+          <div style="font-weight:950">Общо:</div>
+          <div style="font-weight:950">
+            € <span id="totalViewEur">152.86</span>
+            <span class="dual" style="color:rgba(255,255,255,.78)">(<span id="totalViewBgn">299</span> лв)</span>
+          </div>
+        </div>
+
+        <form name="order" method="POST" action="/" data-netlify="true" data-netlify-honeypot="bot-field" onsubmit="return submitOrder(event)">
+          <input type="hidden" name="form-name" value="order" />
+          <p style="display:none"><label>Don’t fill this out: <input name="bot-field" /></label></p>
+
+          <input type="hidden" name="email_subject" value="Нова поръчка: AirPods Pro 3" />
+
+          <input type="hidden" id="items" name="items" value="AirPods Pro 3 x1" />
+          <input type="hidden" id="qtyHidden" name="qty" value="1" />
+          <input type="hidden" id="totalHiddenBgn" name="total_bgn" value="299" />
+          <input type="hidden" id="totalHiddenEur" name="total_eur" value="152.86" />
+
+          <div class="two">
+            <select id="courier" name="courier" required>
+              <option value="" selected disabled>Избери куриер</option>
+              <option value="Econt">Econt</option>
+              <option value="Speedy">Speedy</option>
+            </select>
+            <select id="deliveryType" name="deliveryType" required>
+              <option value="" selected disabled>Получаване</option>
+              <option value="office">До офис</option>
+              <option value="address">До адрес</option>
+            </select>
+          </div>
+
+          <input type="text" id="city" name="city" placeholder="Град" required />
+          <input type="text" id="office" name="office" placeholder="Офис (име/адрес)" style="display:none" />
+          <input type="text" id="addr" name="address" placeholder="Адрес (улица, номер, вход, ет.)" style="display:none" />
+
+          <div class="two">
+            <input type="text" id="fullname" name="fullname" placeholder="Име и фамилия" required />
+            <input type="tel" id="phone" name="phone" placeholder="Телефон" required />
+          </div>
+
+          <input type="text" id="note" name="note" placeholder="Бележка (по желание)" />
+
+          <button class="btn" type="submit">✅ Изпрати поръчка</button>
+          <div style="font-size:12px;color:rgba(255,255,255,.70)">
+            Имейл известие: Netlify Dashboard → Forms → <b>order</b> → Notifications → Email → <b>masqta1337@icloud.com</b>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
+  <!-- SUCCESS MODAL -->
+  <div class="modal" id="successModal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-label="Благодарим">
+      <div class="modalHead">
+        <h2>✅ Успешно</h2>
+        <button class="x" id="closeSuccess" aria-label="Затвори">✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="successBox">
+          <div style="font-size:22px;font-weight:950;margin-bottom:6px">Благодарим за поръчката!</div>
+          <div style="color:rgba(255,255,255,.78);line-height:1.6">
+            Скоро очаквайте наш сътрудник да ви звънне за потвърждаване на поръчката!
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <a class="btn" href="tel:0878460279">📞 Обади се сега</a>
+          <button class="btn btnG" type="button" id="okSuccess">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Netlify form detection (hidden) -->
+  <form name="order" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="order" />
+    <p><label>Don’t fill this out: <input name="bot-field" /></label></p>
+    <input type="text" name="fullname" />
+    <input type="text" name="phone" />
+    <input type="text" name="city" />
+    <input type="text" name="courier" />
+    <input type="text" name="deliveryType" />
+    <input type="text" name="total_bgn" />
+    <input type="text" name="total_eur" />
+    <button type="submit">Send</button>
+  </form>
+
   <script>
-    // Gallery
-    const mainImg = document.getElementById('mainImg');
-    document.querySelectorAll('.thumb').forEach(t => {
-      t.addEventListener('click', () => {
-        const src = t.getAttribute('data-src');
-        if (src) mainImg.src = src;
-      });
-    });
+    // Fixed BGN→EUR conversion (BGN per 1 EUR)
+    const FX_BGN_PER_EUR = 1.95583;
 
-    // State
-    const PRICES = { base: 299, upsell: 10 };
-    const state = { qty: 1, upsell: false };
+    const PRICE_BGN = 215.12;
+    // „Истинска“ цена по BG магазини (~€245.41 / ~479.98 лв)
+    const OLD_BGN = 479.98;
+    const state = { qty: 1 };
 
-    // Helpers
-    const money = (n) => `${n} лв`;
-    const calc = () => {
-      const sub = PRICES.base * state.qty;
-      const up = state.upsell ? PRICES.upsell : 0;
-      const total = sub + up;
-      return { sub, up, total };
-    };
+    const qv = document.getElementById('qv');
 
-    // Elements
-    const cartOverlay = document.getElementById('cartOverlay');
-    const cartDrawer = document.getElementById('cartDrawer');
+    const priceNowBgn = document.getElementById('priceNowBgn');
+    const priceNowEur = document.getElementById('priceNowEur');
+    const oldPriceBgn = document.getElementById('oldPriceBgn');
+    const oldPriceEur = document.getElementById('oldPriceEur');
+    const saveText = document.getElementById('saveText');
 
-    const qtyValDrawer = document.getElementById('qtyValDrawer');
-    const upsellDrawer = document.getElementById('upsellDrawer');
-    const subTotal = document.getElementById('subTotal');
-    const upsellPrice = document.getElementById('upsellPrice');
-    const grandTotal = document.getElementById('grandTotal');
+    const totalCartBgn = document.getElementById('totalCartBgn');
+    const totalCartEur = document.getElementById('totalCartEur');
 
-    const qtyVal = document.getElementById('qtyVal');
-    const upsellCheckout = document.getElementById('upsellCheckout');
-    const totalCheckout = document.getElementById('totalCheckout');
-    const unitPrice = document.getElementById('unitPrice');
+    const totalViewBgn = document.getElementById('totalViewBgn');
+    const totalViewEur = document.getElementById('totalViewEur');
 
-    const stickyTotal = document.getElementById('stickyTotal');
-
-    // Hidden fields in form
-    const totalHidden = document.getElementById('total');
-    const itemsHidden = document.getElementById('items');
+    const totalHiddenBgn = document.getElementById('totalHiddenBgn');
+    const totalHiddenEur = document.getElementById('totalHiddenEur');
     const qtyHidden = document.getElementById('qtyHidden');
-    const upsellHidden = document.getElementById('upsellHidden');
+    const itemsHidden = document.getElementById('items');
 
-    // Pages
-    const pageProduct = document.getElementById('pageProduct');
-    const pageCheckout = document.getElementById('pageCheckout');
-
-    // UI update
-    function render(){
-      const { sub, up, total } = calc();
-
-      // Drawer
-      if(qtyValDrawer) qtyValDrawer.textContent = String(state.qty);
-      if(upsellDrawer) upsellDrawer.checked = state.upsell;
-      if(subTotal) subTotal.textContent = money(sub);
-      if(upsellPrice) upsellPrice.textContent = money(up);
-      if(grandTotal) grandTotal.textContent = money(total);
-
-      // Checkout card
-      if(qtyVal) qtyVal.textContent = String(state.qty);
-      if(upsellCheckout) upsellCheckout.checked = state.upsell;
-      if(unitPrice) unitPrice.textContent = money(PRICES.base);
-      if(totalCheckout) totalCheckout.textContent = money(total);
-
-      // Sticky
-      if(stickyTotal) stickyTotal.textContent = String(total);
-
-      // Form hidden fields
-      if(totalHidden) totalHidden.value = String(total);
-      if(qtyHidden) qtyHidden.value = String(state.qty);
-      if(upsellHidden) upsellHidden.value = state.upsell ? 'yes' : 'no';
-      if(itemsHidden) itemsHidden.value = `AirPods Pro 3 x${state.qty}` + (state.upsell ? ' + Premium case' : '');
-    }
-
-    // Drawer open/close
-    function openCart(){
-      cartOverlay.classList.add('show');
-      cartDrawer.classList.add('show');
-      cartOverlay.setAttribute('aria-hidden','false');
-      cartDrawer.setAttribute('aria-hidden','false');
-      render();
-    }
-    function closeCart(){
-      cartOverlay.classList.remove('show');
-      cartDrawer.classList.remove('show');
-      cartOverlay.setAttribute('aria-hidden','true');
-      cartDrawer.setAttribute('aria-hidden','true');
-    }
-
-    // Bind open buttons
-    ['openCart','openCart2','openCart3','openCartTop'].forEach(id => {
-      const el = document.getElementById(id);
-      el?.addEventListener('click', (e)=>{ e.preventDefault(); openCart(); });
-    });
-
-    document.getElementById('closeCart')?.addEventListener('click', closeCart);
-    document.getElementById('closeCart2')?.addEventListener('click', closeCart);
-    cartOverlay?.addEventListener('click', closeCart);
-
-    // Quantity controls
-    const clampQty = () => { state.qty = Math.max(1, Math.min(5, state.qty)); };
-
-    document.getElementById('qtyPlusDrawer')?.addEventListener('click', ()=>{ state.qty++; clampQty(); render(); });
-    document.getElementById('qtyMinusDrawer')?.addEventListener('click', ()=>{ state.qty--; clampQty(); render(); });
-
-    document.getElementById('qtyPlus')?.addEventListener('click', ()=>{ state.qty++; clampQty(); render(); });
-    document.getElementById('qtyMinus')?.addEventListener('click', ()=>{ state.qty--; clampQty(); render(); });
-
-    // Upsell sync
-    upsellDrawer?.addEventListener('change', ()=>{ state.upsell = !!upsellDrawer.checked; render(); });
-    upsellCheckout?.addEventListener('change', ()=>{ state.upsell = !!upsellCheckout.checked; render(); });
-
-    // Navigation between pages (single-file)
-    function showPageFromHash(){
-      const isCheckout = location.hash === '#checkout';
-      pageProduct.style.display = isCheckout ? 'none' : 'block';
-      pageCheckout.style.display = isCheckout ? 'block' : 'none';
-      if(isCheckout){ closeCart(); }
-      render();
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
-    window.addEventListener('hashchange', showPageFromHash);
-    showPageFromHash();
-
-    document.getElementById('goCheckout')?.addEventListener('click', ()=>{ closeCart(); });
-    document.getElementById('goCheckoutTop')?.addEventListener('click', ()=>{ closeCart(); });
-    document.getElementById('backToProduct')?.addEventListener('click', (e)=>{ e.preventDefault(); location.hash=''; });
-
-    // Delivery fields logic
     const deliveryType = document.getElementById('deliveryType');
     const office = document.getElementById('office');
     const addr = document.getElementById('addr');
 
+    const ov = document.getElementById('ov');
+    const dr = document.getElementById('dr');
+
+    const orderModal = document.getElementById('orderModal');
+    const successModal = document.getElementById('successModal');
+
+    const eur = (bgn)=> (bgn / FX_BGN_PER_EUR);
+    const fmtEur = (n)=> n.toFixed(2);
+    const fmtBgn = (n)=> (Math.round(n*100)/100).toFixed(2).replace(/\.00$/,'');
+
+    const clamp = ()=>{ state.qty = Math.max(1, Math.min(5, state.qty)); };
+    const subtotalBgn = ()=> PRICE_BGN * state.qty;
+
+    function render(){
+      const nowE = eur(PRICE_BGN);
+      const oldE = eur(OLD_BGN);
+
+      priceNowBgn.textContent = fmtBgn(PRICE_BGN);
+      priceNowEur.textContent = fmtEur(nowE);
+
+      oldPriceBgn.textContent = fmtBgn(OLD_BGN);
+      oldPriceEur.textContent = fmtEur(oldE);
+
+      const tBgn = subtotalBgn();
+      const tEur = eur(tBgn);
+
+      qv.textContent = String(state.qty);
+
+      totalCartBgn.textContent = fmtBgn(tBgn);
+      totalCartEur.textContent = fmtEur(tEur);
+
+      totalViewBgn.textContent = fmtBgn(tBgn);
+      totalViewEur.textContent = fmtEur(tEur);
+
+      qtyHidden.value = String(state.qty);
+      totalHiddenBgn.value = fmtBgn(tBgn);
+      totalHiddenEur.value = fmtEur(tEur);
+      itemsHidden.value = `AirPods Pro 3 x${state.qty}`;
+
+      const diffBgn = (OLD_BGN - PRICE_BGN);
+      const diffEur = eur(diffBgn);
+      saveText.textContent = `Спестяваш € ${fmtEur(diffEur)} (${fmtBgn(diffBgn)} лв)`;
+    }
+
+    function openCart(){ ov.classList.add('show'); dr.classList.add('show'); }
+    function closeCart(){ ov.classList.remove('show'); dr.classList.remove('show'); }
+
+    function openOrder(){ closeCart(); orderModal.classList.add('show'); orderModal.setAttribute('aria-hidden','false'); render(); }
+    function closeOrder(){ orderModal.classList.remove('show'); orderModal.setAttribute('aria-hidden','true'); }
+
+    function openSuccess(){
+      successModal.classList.add('show');
+      successModal.setAttribute('aria-hidden','false');
+    }
+    function closeSuccess(){
+      successModal.classList.remove('show');
+      successModal.setAttribute('aria-hidden','true');
+    }
+
+    document.getElementById('openCart')?.addEventListener('click', (e)=>{ e.preventDefault(); openCart(); render(); });
+    document.getElementById('x')?.addEventListener('click', closeCart);
+    ov?.addEventListener('click', closeCart);
+
+    document.getElementById('p')?.addEventListener('click', ()=>{ state.qty++; clamp(); render(); });
+    document.getElementById('m')?.addEventListener('click', ()=>{ state.qty--; clamp(); render(); });
+
+    document.getElementById('openOrder')?.addEventListener('click', (e)=>{ e.preventDefault(); openOrder(); });
+    document.getElementById('toOrder')?.addEventListener('click', (e)=>{ e.preventDefault(); openOrder(); });
+    document.getElementById('closeOrder')?.addEventListener('click', closeOrder);
+    orderModal?.addEventListener('click', (e)=>{ if(e.target === orderModal) closeOrder(); });
+
+    document.getElementById('closeSuccess')?.addEventListener('click', closeSuccess);
+    document.getElementById('okSuccess')?.addEventListener('click', closeSuccess);
+    successModal?.addEventListener('click', (e)=>{ if(e.target === successModal) closeSuccess(); });
+
     deliveryType?.addEventListener('change', () => {
       const v = deliveryType.value;
       if(v === 'office'){
-        office.style.display = 'block';
-        addr.style.display = 'none';
-        office.required = true;
-        addr.required = false;
+        office.style.display = 'block'; addr.style.display = 'none';
+        office.required = true; addr.required = false;
       } else if(v === 'address'){
-        addr.style.display = 'block';
-        office.style.display = 'none';
-        addr.required = true;
-        office.required = false;
+        addr.style.display = 'block'; office.style.display = 'none';
+        addr.required = true; office.required = false;
       }
     });
 
-    // Netlify submit (works when hosted on Netlify)
-    function encode(data) {
-      return Object.keys(data)
-        .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-        .join('&');
+    function encode(data){
+      return Object.keys(data).map(k => encodeURIComponent(k)+'='+encodeURIComponent(data[k])).join('&');
     }
 
     async function submitOrder(e){
@@ -1008,69 +554,68 @@
       if(dt === 'office' && !fd.get('office')){ alert('Моля попълни офис.'); return false; }
       if(dt === 'address' && !fd.get('address')){ alert('Моля попълни адрес.'); return false; }
 
-      const data = {};
-      fd.forEach((v,k)=> data[k]=v);
-
+      const data = {}; fd.forEach((v,k)=>data[k]=v);
       const isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
       if(isLocal){
-        const lines = [
-          'ДЕМО (локално):',
-          `Куриер: ${data.courier}`,
-          `Тип: ${data.deliveryType}`,
-          `Град: ${data.city}`,
-          `Офис: ${data.office || '-'}`,
-          `Адрес: ${data.address || '-'}`,
-          `Име: ${data.fullname}`,
-          `Тел: ${data.phone}`,
-          `Кол-во: ${data.qty}`,
-          `Upsell: ${data.upsell}`,
-          `Общо: ${data.total} лв`,
-          '',
-          'За автоматично изпращане на имейл: качи на Netlify и включи Email notification за Forms.'
-        ];
-        alert(lines.join('\n'));
+        closeOrder();
+        openSuccess();
         return false;
       }
 
       try{
-        await fetch('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: encode(data),
-        });
-        alert('Поръчката е изпратена успешно ✅');
+        await fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: encode(data) });
         form.reset();
-        if(office){ office.style.display = 'none'; office.required = false; }
-        if(addr){ addr.style.display = 'none'; addr.required = false; }
-        // keep cart state
-        render();
-      } catch (err){
-        alert('Грешка при изпращане. Ако си локално — това е нормално. Качи на Netlify за реално получаване.');
+        office.style.display='none'; addr.style.display='none';
+        office.required=false; addr.required=false;
+        state.qty=1; render();
+        closeOrder();
+        openSuccess();
+      } catch(err){
+        alert('Грешка при изпращане. Провери Notifications в Netlify Forms.');
       }
-
       return false;
     }
 
-    // initial
+    // reveal on scroll
+    const io = new IntersectionObserver((entries)=>{
+      for(const e of entries){ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } }
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    // tests (?test=1)
+    function assert(cond, msg){ if(!cond) throw new Error('TEST FAIL: ' + msg); }
+    function near(a,b,eps=0.01){ return Math.abs(a-b) <= eps; }
+    function runTests(){
+      state.qty = 1; assert(subtotalBgn() === 299, 'subtotalBgn 1');
+      state.qty = 3; assert(subtotalBgn() === 897, 'subtotalBgn 3');
+      state.qty = 0; clamp(); assert(state.qty === 1, 'clamp lower');
+      state.qty = 6; clamp(); assert(state.qty === 5, 'clamp upper');
+      const e1 = eur(299); assert(near(e1, 152.86), 'EUR conversion 299');
+      state.qty = 2; render();
+      assert(qtyHidden.value === '2', 'hidden qty');
+      assert(totalHiddenBgn.value === '598', 'hidden total bgn');
+      assert(totalHiddenEur.value === fmtEur(eur(598)), 'hidden total eur');
+      console.log('All tests passed ✅');
+      state.qty = 1; render();
+    }
+    if(new URLSearchParams(location.search).get('test') === '1') runTests();
+
+    // gallery
+    const mainImg = document.getElementById('mainImg');
+    document.querySelectorAll('.th').forEach((btn)=>{
+      btn.addEventListener('click', ()=>{
+        const src = btn.getAttribute('data-src');
+        if(mainImg && src){
+          mainImg.src = src;
+          document.querySelectorAll('.th').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+        }
+      });
+    });
+
     render();
   </script>
-
-
-  <!-- NETLIFY FORM DETECTION FIX (СКРИТА ФОРМА) -->
-  <!-- Това е САМО за Netlify да засече формата. Не се вижда от потребителя. -->
-  <form name="order" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
-    <input type="hidden" name="form-name" value="order" />
-    <p>
-      <label><input name="bot-field" /></label>
-    </p>
-    <input type="text" name="Имена" />
-    <input type="text" name="Тел Номер" />
-    <input type="text" name="Град" />
-    <input type="text" name="Куриер" />
-    <input type="text" name="Начин за дс" />
-    <input type="text" name="общо" />
-    <button type="submit">Send</button>
-  </form>
 
 </body>
 </html>
