@@ -356,7 +356,7 @@
   <div class="top" id="topBar">
     <div class="topin">
       <div class="logo">AirStore Bulgaria</div>
-      <div class="pill">🔥 -55% НАМАЛЕНИЕ • БЕЗПЛАТНА ДОСТАВКА</div>
+      <div class="pill">🔥 МЕГА НАМАЛЕНИЕ • БЕЗПЛАТНА ДОСТАВКА</div>
       <div class="top-actions">
         <button class="icon-btn" onclick="openCart()" aria-label="Кошница">
           🛒
@@ -386,14 +386,14 @@
 
         <div class="price-container">
           <div class="price-row">
-            <div class="price-current">€ <span id="priceNowEur">152.86</span></div>
-            <div class="price-old">€ <span id="oldPriceEur">245.41</span></div>
-            <div class="price-save">💰 Спестяваш € <span id="saveEur">92.55</span></div>
+            <div class="price-current">€ <span id="priceNowEur">45.00</span></div>
+            <div class="price-old">€ <span id="oldPriceEur">72.58</span></div>
+            <div class="price-save">💰 Спестяваш € <span id="saveEur">27.58</span></div>
           </div>
           <div class="price-dual">
-            <span>🇧🇬 <span id="priceNowBgn">299</span> лв</span>
-            <span style="text-decoration:line-through;opacity:.6">🇧🇬 <span id="oldPriceBgn">479.98</span> лв</span>
-            <span style="color:var(--success);font-weight:700">Спестяваш <span id="saveBgn">180.98</span> лв</span>
+            <span>🇧🇬 <span id="priceNowBgn">88</span> лв</span>
+            <span style="text-decoration:line-through;opacity:.6">🇧🇬 <span id="oldPriceBgn">142</span> лв</span>
+            <span style="color:var(--success);font-weight:700">Спестяваш <span id="saveBgn">54</span> лв</span>
           </div>
         </div>
 
@@ -656,8 +656,8 @@
       <div class="cart-total">
         <span>Общо:</span>
         <div class="cart-total-price">
-          € <span id="totalEur">152.86</span>
-          <div style="font-size:14px;color:var(--muted);font-weight:400;text-align:right">(<span id="totalBgn">299</span> лв)</div>
+          € <span id="totalEur">45.00</span>
+          <div style="font-size:14px;color:var(--muted);font-weight:400;text-align:right">(<span id="totalBgn">88</span> лв)</div>
         </div>
       </div>
       <div class="cart-actions">
@@ -686,7 +686,7 @@
           </div>
           <div class="summary-row">
             <span>Общо:</span>
-            <span>€ <span id="orderTotalEur">152.86</span> (<span id="orderTotalBgn">299</span> лв)</span>
+            <span>€ <span id="orderTotalEur">45.00</span> (<span id="orderTotalBgn">88</span> лв)</span>
           </div>
         </div>
 
@@ -699,8 +699,8 @@
           <input type="hidden" name="form-name" value="order" />
           <input type="hidden" name="subject" value="Нова поръчка от AirStore" />
           <input type="hidden" id="formQty" name="qty" value="1" />
-          <input type="hidden" id="formTotalBgn" name="total_bgn" value="299" />
-          <input type="hidden" id="formTotalEur" name="total_eur" value="152.86" />
+          <input type="hidden" id="formTotalBgn" name="total_bgn" value="88" />
+          <input type="hidden" id="formTotalEur" name="total_eur" value="45.00" />
 
           <div class="form-row">
             <div class="form-group">
@@ -781,10 +781,12 @@
   <div class="toast" id="toast">Добавено в кошницата!</div>
 
   <script>
-    // Constants
+    // Constants - UPDATED PRICES
     const FX_BGN_PER_EUR = 1.95583;
-    const PRICE_BGN = 299;
-    const OLD_BGN = 479.98;
+    const PRICE_EUR = 45;  // 45 EUR target price
+    const PRICE_BGN = Math.round(PRICE_EUR * FX_BGN_PER_EUR);  // ~88 BGN
+    const OLD_EUR = 72.58;  // Original price for 38% discount display
+    const OLD_BGN = Math.round(OLD_EUR * FX_BGN_PER_EUR);  // ~142 BGN
     let qty = 1;
 
     // DOM Elements
@@ -807,23 +809,20 @@
       saveBgn: document.getElementById('saveBgn')
     };
 
-    // Calculations
-    const eur = (bgn) => bgn / FX_BGN_PER_EUR;
+    // Format functions
     const fmtEur = (n) => n.toFixed(2);
     const fmtBgn = (n) => Math.round(n).toString();
 
     function updatePrices() {
-      const nowEur = eur(PRICE_BGN);
-      const oldEur = eur(OLD_BGN);
-      const saveEur = oldEur - nowEur;
+      const saveEur = OLD_EUR - PRICE_EUR;
       const saveBgn = OLD_BGN - PRICE_BGN;
+      const totalEur = PRICE_EUR * qty;
       const totalBgn = PRICE_BGN * qty;
-      const totalEur = eur(totalBgn);
 
       // Update hero prices
-      els.priceNowEur.textContent = fmtEur(nowEur);
+      els.priceNowEur.textContent = fmtEur(PRICE_EUR);
       els.priceNowBgn.textContent = fmtBgn(PRICE_BGN);
-      els.oldPriceEur.textContent = fmtEur(oldEur);
+      els.oldPriceEur.textContent = fmtEur(OLD_EUR);
       els.oldPriceBgn.textContent = fmtBgn(OLD_BGN);
       els.saveEur.textContent = fmtEur(saveEur);
       els.saveBgn.textContent = fmtBgn(saveBgn);
