@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - AirStore Bulgaria</title>
+  <style>
+    :root{
+      --bg:#f1f5f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --card:#fff;
+      --accent:#0071e3;
+      --success:#22c55e;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --sidebar:#0f172a;
+      --r:12px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);color:var(--text);line-height:1.5}
+    
+    /* Login */
+    .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--sidebar),#1e293b);display:grid;place-items:center;z-index:1000}
+    .login-box{background:var(--card);padding:40px;border-radius:var(--r);width:90%;max-width:400px;box-shadow:0 25px 50px rgba(0,0,0,.3)}
+    .login-logo{text-align:center;margin-bottom:30px}
+    .login-logo-icon{width:70px;height:70px;background:linear-gradient(135deg,var(--accent),#00d4aa);border-radius:20px;display:grid;place-items:center;margin:0 auto 16px;color:#fff;font-size:32px}
+    .login-logo h1{margin:0;font-size:24px}
+    .login-logo p{margin:8px 0 0;color:var(--muted);font-size:14px}
+    .form-group{margin-bottom:20px}
+    .form-label{display:block;font-weight:600;font-size:13px;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+    .form-input{width:100%;padding:14px 16px;border-radius:var(--r);border:2px solid var(--line);font-size:15px;outline:none;transition:border-color .2s}
+    .form-input:focus{border-color:var(--accent)}
+    .btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-weight:600;font-size:15px;cursor:pointer;transition:all .2s}
+    .btn:hover{background:#005bb5}
+    .btn-danger{background:var(--danger)}
+    .btn-danger:hover{background:#dc2626}
+    .btn-success{background:var(--success)}
+    .btn-sm{padding:8px 16px;font-size:13px;width:auto}
+    .error-message{color:var(--danger);font-size:13px;margin-top:8px;text-align:center}
+
+    /* Admin Layout */
+    .admin-layout{display:none;min-height:100vh}
+    .admin-layout.show{display:grid;grid-template-columns:260px 1fr}
+    
+    /* Sidebar */
+    .sidebar{background:var(--sidebar);color:#fff;padding:24px 0}
+    .sidebar-header{padding:0 24px 24px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .sidebar-logo{display:flex;align-items:center;gap:12px}
+    .sidebar-logo-icon{width:44px;height:44px;background:var(--accent);border-radius:12px;display:grid;place-items:center;font-size:20px}
+    .sidebar-logo-text{font-weight:700;font-size:18px}
+    .sidebar-nav{margin-top:24px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:14px 24px;cursor:pointer;transition:all .2s;border-left:3px solid transparent}
+    .nav-item:hover{background:rgba(255,255,255,.05)}
+    .nav-item.active{background:rgba(255,255,255,.1);border-left-color:var(--accent)}
+    .nav-item-icon{font-size:20px}
+    .nav-item-text{font-size:14px}
+    .sidebar-footer{position:absolute;bottom:0;left:0;right:0;padding:24px;border-top:1px solid rgba(255,255,255,.1)}
+    .logout-btn{width:100%;padding:12px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+    .logout-btn:hover{background:rgba(255,255,255,.2)}
+
+    /* Main Content */
+    .main-content{overflow:auto}
+    .header{background:var(--card);padding:20px 32px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+    .header-title{font-size:24px;font-weight:700}
+    .header-user{display:flex;align-items:center;gap:12px}
+    .header-avatar{width:40px;height:40px;background:var(--accent);border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700}
+
+    .content{padding:32px}
+
+    /* Stats Cards */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:32px}
+    .stat-card{background:var(--card);padding:24px;border-radius:var(--r);border:1px solid var(--line)}
+    .stat-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:12px}
+    .stat-icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:24px}
+    .stat-icon.blue{background:var(--accent-light);color:var(--accent)}
+    .stat-icon.green{background:#dcfce7;color:var(--success)}
+    .stat-icon.orange{background:#fef3c7;color:var(--warning)}
+    .stat-icon.red{background:#fee2e2;color:var(--danger)}
+    .stat-value{font-size:32px;font-weight:800;margin-bottom:4px}
+    .stat-label{color:var(--muted);font-size:14px}
+    .stat-change{font-size:13px;margin-top:8px}
+    .stat-change.up{color:var(--success)}
+    .stat-change.down{color:var(--danger)}
+
+    /* Tables */
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+    .card-header{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+    .card-title{font-size:18px;font-weight:700}
+    .card-body{padding:0;overflow-x:auto}
+    .table{width:100%;border-collapse:collapse;font-size:14px}
+    .table th,.table td{padding:14px 20px;text-align:left;border-bottom:1px solid var(--line)}
+    .table th{background:#f8fafc;font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase}
+    .table tr:hover{background:#f8fafc}
+    .table td{vertical-align:middle}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600}
+    .badge-new{background:#dbeafe;color:#1e40af}
+    .badge-processing{background:#fef3c7;color:#92400e}
+    .badge-completed{background:#dcfce7;color:#166534}
+    .badge-cancelled{background:#fee2e2;color:#991b1b}
+
+    /* Status Select */
+    .status-select{padding:6px 12px;border-radius:6px;border:1px solid var(--line);font-size:13px;outline:none;cursor:pointer}
+
+    /* Action Buttons */
+    .actions{display:flex;gap:8px}
+    .action-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;transition:all .2s}
+    .action-btn:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+    .action-btn.edit:hover{background:var(--accent);border-color:var(--accent)}
+
+    /* Reviews Grid */
+    .reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .review-card-admin{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+    .review-header-admin{display:flex;justify-content:space-between;align-items:start;margin-bottom:12px}
+    .reviewer-admin{display:flex;align-items:center;gap:12px}
+    .reviewer-avatar-admin{width:44px;height:44px;background:var(--accent);color:#fff;border-radius:50%;display:grid;place-items:center;font-weight:700}
+    .reviewer-info-admin{flex:1}
+    .reviewer-name-admin{font-weight:600}
+    .review-date-admin{color:var(--muted);font-size:12px}
+    .review-stars-admin{color:#fbbf24;font-size:16px;margin-bottom:8px}
+    .review-text-admin{color:var(--muted);font-size:14px;line-height:1.6}
+    .review-actions-admin{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+
+    /* Add Review Form */
+    .add-review-form{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;margin-bottom:24px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .star-input{display:flex;gap:8px;font-size:28px;cursor:pointer}
+    .star-input span{color:#e5e7eb;transition:all .2s}
+    .star-input span:hover,.star-input span.active{color:#fbbf24}
+
+    /* Empty State */
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty-icon{font-size:60px;margin-bottom:16px;opacity:.5}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;place-items:center;padding:20px;background:rgba(0,0,0,.5);z-index:500}
+    .modal.show{display:grid}
+    .modal-content{background:var(--card);border-radius:var(--r);width:100%;max-width:600px;max-height:90vh;overflow:auto}
+    .modal-header{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+    .modal-title{font-size:18px;font-weight:700}
+    .close-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:transparent;display:grid;place-items:center;cursor:pointer}
+    .modal-body{padding:24px}
+    .order-detail-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+    .order-detail-row:last-child{border-bottom:none}
+    .order-detail-label{color:var(--muted);font-size:14px}
+    .order-detail-value{font-weight:600}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--line)}
+    .tab{padding:12px 20px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+    /* Section */
+    .section{display:none}
+    .section.active{display:block}
+
+    @media (max-width: 1024px){
+      .admin-layout.show{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .reviews-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="login-logo-icon">🎧</div>
+        <h1>AirStore Admin</h1>
+        <p>Влезте в админ панела</p>
+      </div>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Потребителско име</label>
+          <input type="text" class="form-input" id="username" placeholder="Въведи username" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Парола</label>
+          <input type="password" class="form-input" id="password" placeholder="Въведи парола" required />
+        </div>
+        <button type="submit" class="btn">Вход</button>
+        <div class="error-message" id="loginError"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Layout -->
+  <div class="admin-layout" id="adminLayout">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">🎧</div>
+          <div class="sidebar-logo-text">AirStore</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" onclick="showSection('dashboard')">
+          <span class="nav-item-icon">📊</span>
+          <span class="nav-item-text">Табло</span>
+        </div>
+        <div class="nav-item" onclick="showSection('orders')">
+          <span class="nav-item-icon">📦</span>
+          <span class="nav-item-text">Поръчки</span>
+        </div>
+        <div class="nav-item" onclick="showSection('reviews')">
+          <span class="nav-item-icon">⭐</span>
+          <span class="nav-item-text">Отзиви</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">🚪 Изход</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- Dashboard Section -->
+      <div class="section active" id="dashboardSection">
+        <div class="header">
+          <div class="header-title">📊 Табло</div>
+          <div class="header-user">
+            <span>Администратор</span>
+            <div class="header-avatar">A</div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" id="statVisitors">0</div>
+                  <div class="stat-label">Посетители</div>
+                </div>
+                <div class="stat-icon blue">👥</div>
+              </div>
+              <div class="stat-change up">↑ Общо посещения</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" id="statOrders">0</div>
+                  <div class="stat-label">Поръчки</div>
+                </div>
+                <div class="stat-icon green">📦</div>
+              </div>
+              <div class="stat-change up">↑ Общо поръчки</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" id="statRevenue">€0</div>
+                  <div class="stat-label">Приходи</div>
+                </div>
+                <div class="stat-icon orange">💰</div>
+              </div>
+              <div class="stat-change up">↑ Общо приходи</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" id="statReviews">0</div>
+                  <div class="stat-label">Отзиви</div>
+                </div>
+                <div class="stat-icon red">⭐</div>
+              </div>
+              <div class="stat-change up">↑ Общо отзиви</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📈 Последни поръчки</div>
+            </div>
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>№</th>
+                    <th>Клиент</th>
+                    <th>Телефон</th>
+                    <th>Град</th>
+                    <th>Сума</th>
+                    <th>Статус</th>
+                  </tr>
+                </thead>
+                <tbody id="recentOrdersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Section -->
+      <div class="section" id="ordersSection">
+        <div class="header">
+          <div class="header-title">📦 Всички поръчки</div>
+          <div class="header-user">
+            <span>Администратор</span>
+            <div class="header-avatar">A</div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="tabs">
+            <div class="tab active" onclick="filterOrders('all')">Всички</div>
+            <div class="tab" onclick="filterOrders('new')">Нови</div>
+            <div class="tab" onclick="filterOrders('processing')">В обработка</div>
+            <div class="tab" onclick="filterOrders('completed')">Завършени</div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>№ Поръчка</th>
+                    <th>Дата</th>
+                    <th>Клиент</th>
+                    <th>Телефон</th>
+                    <th>Град</th>
+                    <th>Куриер</th>
+                    <th>Кол.</th>
+                    <th>Сума</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="allOrdersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="section" id="reviewsSection">
+        <div class="header">
+          <div class="header-title">⭐ Управление на отзиви</div>
+          <div class="header-user">
+            <span>Администратор</span>
+            <div class="header-avatar">A</div>
+          </div>
+        </div>
+        <div class="content">
+          <!-- Add Review Form -->
+          <div class="add-review-form">
+            <h3 style="margin:0 0 20px">Добави нов отзив</h3>
+            <form id="addReviewForm" onsubmit="addReviewFromAdmin(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Име на клиента</label>
+                  <input type="text" class="form-input" id="adminReviewName" placeholder="Въведи име" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Оценка</label>
+                  <div class="star-input" id="adminStarInput">
+                    <span data-rating="1">★</span>
+                    <span data-rating="2">★</span>
+                    <span data-rating="3">★</span>
+                    <span data-rating="4">★</span>
+                    <span data-rating="5">★</span>
+                  </div>
+                  <input type="hidden" id="adminReviewRating" value="5" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Отзив</label>
+                <textarea class="form-input" id="adminReviewText" rows="3" placeholder="Въведи отзив..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                  <input type="checkbox" id="adminReviewVerified" style="width:18px;height:18px" />
+                  <span>Проверена покупка</span>
+                </label>
+              </div>
+              <button type="submit" class="btn btn-success" style="width:auto">➕ Добави отзив</button>
+            </form>
+          </div>
+
+          <!-- Reviews List -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Всички отзиви</div>
+            </div>
+            <div class="card-body">
+              <div class="reviews-grid" id="adminReviewsGrid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal" id="orderModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📋 Детайли за поръчка</div>
+        <button class="close-btn" onclick="closeOrderModal()">✕</button>
+      </div>
+      <div class="modal-body" id="orderDetailBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== AUTH =====
+    const ADMIN_USER = 'vankoadmin';
+    const ADMIN_PASS = 'vanko094312';
+    let currentFilter = 'all';
+    let adminRating = 5;
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      
+      if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminLayout').classList.add('show');
+        localStorage.setItem('admin_logged_in', 'true');
+        initDashboard();
+      } else {
+        document.getElementById('loginError').textContent = 'Грешно потребителско име или парола!';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('admin_logged_in');
+      location.reload();
+    }
+
+    // Check if already logged in
+    if (localStorage.getItem('admin_logged_in') === 'true') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminLayout').classList.add('show');
+      initDashboard();
+    }
+
+    // ===== NAVIGATION =====
+    function showSection(section) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(section + 'Section').classList.add('active');
+      event.target.closest('.nav-item').classList.add('active');
+      
+      if (section === 'orders') loadOrders();
+      if (section === 'reviews') loadAdminReviews();
+    }
+
+    // ===== DASHBOARD - FETCHES FROM NEON DATABASE =====
+    function initDashboard() {
+      updateStats();
+      loadRecentOrders();
+      
+      // Setup admin star rating
+      document.querySelectorAll('#adminStarInput span').forEach(star => {
+        star.addEventListener('click', () => {
+          adminRating = parseInt(star.dataset.rating);
+          document.getElementById('adminReviewRating').value = adminRating;
+          updateAdminStarDisplay(adminRating);
+        });
+      });
+    }
+
+    function updateAdminStarDisplay(rating) {
+      document.querySelectorAll('#adminStarInput span').forEach((star, i) => {
+        star.classList.toggle('active', i < rating);
+      });
+    }
+
+    // Fetch stats from database
+    async function updateStats() {
+      try {
+        const response = await fetch('/.netlify/functions/get-stats');
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('statVisitors').textContent = result.stats.totalVisitors || 0;
+          document.getElementById('statOrders').textContent = result.stats.totalOrders || 0;
+          document.getElementById('statReviews').textContent = result.stats.totalReviews || 0;
+          document.getElementById('statRevenue').textContent = '€' + (result.stats.totalRevenue || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    }
+
+    // Fetch recent orders from database
+    async function loadRecentOrders() {
+      try {
+        const response = await fetch('/.netlify/functions/get-orders?limit=5');
+        const result = await response.json();
+        
+        const tbody = document.getElementById('recentOrdersTable');
+        
+        if (!result.success || result.orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">Няма поръчки все още</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = result.orders.map(o => `
+          <tr>
+            <td>#${o.id}</td>
+            <td>${o.name}</td>
+            <td>${o.phone}</td>
+            <td>${o.city}</td>
+            <td>€${parseFloat(o.total_eur).toFixed(2)}</td>
+            <td><span class="badge badge-${o.status || 'new'}">${getStatusText(o.status)}</span></td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading recent orders:', error);
+      }
+    }
+
+    // ===== ORDERS - FETCHES FROM NEON DATABASE =====
+    let allOrders = []; // Store orders for filtering
+    
+    async function loadOrders() {
+      try {
+        const response = await fetch('/.netlify/functions/get-orders');
+        const result = await response.json();
+        
+        if (!result.success) {
+          document.getElementById('allOrdersTable').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Грешка при зареждане</td></tr>';
+          return;
+        }
+        
+        allOrders = result.orders || [];
+        
+        // Filter if needed
+        let orders = allOrders;
+        if (currentFilter !== 'all') {
+          orders = orders.filter(o => o.status === currentFilter);
+        }
+        
+        const tbody = document.getElementById('allOrdersTable');
+        
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Няма поръчки</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = orders.map(o => `
+          <tr>
+            <td>#${o.id}</td>
+            <td>${new Date(o.created_at).toLocaleDateString('bg-BG')}</td>
+            <td>${o.name}</td>
+            <td>${o.phone}</td>
+            <td>${o.city}</td>
+            <td>${o.courier}</td>
+            <td>${o.qty}</td>
+            <td>€${parseFloat(o.total_eur).toFixed(2)}</td>
+            <td>
+              <select class="status-select" onchange="updateOrderStatus(${o.id}, this.value)">
+                <option value="new" ${o.status === 'new' ? 'selected' : ''}>Нова</option>
+                <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>В обработка</option>
+                <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Завършена</option>
+                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Отказана</option>
+              </select>
+            </td>
+            <td>
+              <div class="actions">
+                <button class="action-btn edit" onclick="viewOrderDetail(${o.id})">👁</button>
+                <button class="action-btn" onclick="deleteOrder(${o.id})">🗑</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        document.getElementById('allOrdersTable').innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Грешка при зареждане на поръчки</td></tr>';
+      }
+    }
+
+    function filterOrders(status) {
+      currentFilter = status;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      loadOrders();
+    }
+
+    function getStatusText(status) {
+      const map = { new: 'Нова', processing: 'В обработка', completed: 'Завършена', cancelled: 'Отказана' };
+      return map[status] || 'Нова';
+    }
+
+    // Update order status in database
+    async function updateOrderStatus(id, status) {
+      try {
+        const response = await fetch('/.netlify/functions/update-order-status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status })
+        });
+        
+        if (response.ok) {
+          updateStats();
+          showToast('Статусът е обновен', 'success');
+        }
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        showToast('Грешка при обновяване', 'error');
+      }
+    }
+
+    function viewOrderDetail(id) {
+      const order = allOrders.find(o => o.id === id);
+      if (!order) return;
+      
+      document.getElementById('orderDetailBody').innerHTML = `
+        <div class="order-detail-row">
+          <span class="order-detail-label">№ Поръчка</span>
+          <span class="order-detail-value">#${order.id}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Дата</span>
+          <span class="order-detail-value">${new Date(order.created_at).toLocaleString('bg-BG')}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Клиент</span>
+          <span class="order-detail-value">${order.name}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Телефон</span>
+          <span class="order-detail-value">${order.phone}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Град</span>
+          <span class="order-detail-value">${order.city}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Адрес/Офис</span>
+          <span class="order-detail-value">${order.address || '-'}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Куриер</span>
+          <span class="order-detail-value">${order.courier}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Количество</span>
+          <span class="order-detail-value">${order.qty} бр.</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Промо код</span>
+          <span class="order-detail-value">${order.promo_code || '-'}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Обща сума</span>
+          <span class="order-detail-value" style="color:var(--success);font-size:18px">€${parseFloat(order.total_eur).toFixed(2)}</span>
+        </div>
+      `;
+      document.getElementById('orderModal').classList.add('show');
+    }
+
+    function closeOrderModal() {
+      document.getElementById('orderModal').classList.remove('show');
+    }
+
+    // Delete order from database
+    async function deleteOrder(id) {
+      if (!confirm('Сигурни ли сте, че искате да изтриете тази поръчка?')) return;
+      
+      try {
+        const response = await fetch('/.netlify/functions/delete-order', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        
+        if (response.ok) {
+          loadOrders();
+          updateStats();
+          showToast('Поръчката е изтрита', 'success');
+        }
+      } catch (error) {
+        console.error('Error deleting order:', error);
+        showToast('Грешка при изтриване', 'error');
+      }
+    }
+    
+    // Toast notification
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:12px 20px;background:' + (type === 'success' ? '#22c55e' : '#ef4444') + ';color:#fff;border-radius:8px;z-index:1000;font-weight:600;';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ===== REVIEWS - FETCHES FROM NEON DATABASE =====
+    async function loadAdminReviews() {
+      try {
+        const response = await fetch('/.netlify/functions/get-reviews?limit=100');
+        const result = await response.json();
+        
+        const container = document.getElementById('adminReviewsGrid');
+        
+        if (!result.success || result.reviews.length === 0) {
+          container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⭐</div><div>Няма отзиви все още</div></div>';
+          return;
+        }
+        
+        container.innerHTML = result.reviews.map(r => `
+          <div class="review-card-admin">
+            <div class="review-header-admin">
+              <div class="reviewer-admin">
+                <div class="reviewer-avatar-admin">${r.name.charAt(0)}</div>
+                <div class="reviewer-info-admin">
+                  <div class="reviewer-name-admin">${r.name} ${r.verified ? '✓' : ''}</div>
+                  <div class="review-date-admin">${new Date(r.created_at).toLocaleDateString('bg-BG')}</div>
+                </div>
+              </div>
+            </div>
+            <div class="review-stars-admin">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+            <div class="review-text-admin">${r.text}</div>
+            <div class="review-actions-admin">
+              <button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})">🗑 Изтрий</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        document.getElementById('adminReviewsGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⭐</div><div>Грешка при зареждане</div></div>';
+      }
+    }
+
+    // Add review from admin - saves to database
+    async function addReviewFromAdmin(e) {
+      e.preventDefault();
+      
+      const reviewData = {
+        name: document.getElementById('adminReviewName').value,
+        rating: parseInt(document.getElementById('adminReviewRating').value),
+        text: document.getElementById('adminReviewText').value,
+        verified: document.getElementById('adminReviewVerified').checked
+      };
+      
+      try {
+        const response = await fetch('/.netlify/functions/save-review', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reviewData)
+        });
+        
+        if (response.ok) {
+          document.getElementById('addReviewForm').reset();
+          adminRating = 5;
+          updateAdminStarDisplay(5);
+          loadAdminReviews();
+          updateStats();
+          showToast('Отзивът е добавен!', 'success');
+        }
+      } catch (error) {
+        console.error('Error adding review:', error);
+        showToast('Грешка при добавяне', 'error');
+      }
+    }
+
+    // Delete review from database
+    async function deleteReview(id) {
+      if (!confirm('Сигурни ли сте?')) return;
+      
+      try {
+        const response = await fetch('/.netlify/functions/delete-review', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        
+        if (response.ok) {
+          loadAdminReviews();
+          updateStats();
+          showToast('Отзивът е изтрит', 'success');
+        }
+      } catch (error) {
+        console.error('Error deleting review:', error);
+        showToast('Грешка при изтриване', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "airstore-bulgaria",
+  "version": "2.0.0",
+  "description": "AirStore Bulgaria - AirPods Pro 3 e-commerce site with Neon PostgreSQL database",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecommerce",
+    "airpods",
+    "bulgaria",
+    "netlify",
+    "neon"
+  ],
+  "author": "AirStore Bulgaria",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
